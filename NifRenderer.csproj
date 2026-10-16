@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <RollForward>Major</RollForward>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishSingleFile>true</PublishSingleFile>
+    <TieredCompilation>false</TieredCompilation>
+      <UseWindowsForms>true</UseWindowsForms>
+      <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="NifRenderer.Editing.Transform" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="NifRenderer.Editing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="NifRenderer.Renderer.Scene" />
+    <Using Include="NifRenderer.Renderer.Loading" />
+    <Using Include="NifRenderer.Renderer.Vertex" />
+    <Using Include="NifRenderer.Editing.Records" />
+    <Using Include="NifRenderer.Files" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="NifRenderer.UI.Common" />
+    <Using Include="NifRenderer.UI.Skia" />
+    <Using Include="NifRenderer.UI.Dialogs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Icon.ico" />
+    <None Remove="Icon.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icon.ico">
+      <LogicalName>Icon.ico</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icon.bmp">
+      <LogicalName>Icon.bmp</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BCnEncoder.Net" Version="2.3.0" />
+    <PackageReference Include="FontStashSharp.MonoGame" Version="1.6.1" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
+    <PackageReference Include="MonoGame.Framework.Content.Pipeline" Version="3.8.6" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.*" />
+    <PackageReference Include="Nifly" Version="1.0.0" />
+    <PackageReference Include="SkiaGameRendering" Version="0.18.0" />
+    <PackageReference Include="Svg.Skia" Version="5.2.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="LibRimeSharp">
+      <HintPath>lib\LibRimeSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="CopyRime" AfterTargets="Build;Publish">
+    <Copy SourceFiles="lib\rime.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="lib\rime.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(PublishDir)' != ''" />
+  </Target>
+  <Target Name="RestoreDotnetTools" BeforeTargets="CollectPackageReferences">
+    <Message Text="Restoring dotnet tools (this might take a while depending on your internet speed and should only happen upon building your project for the first time, or after upgrading MonoGame, or clearing your nuget cache)" Importance="High" />
+    <Exec Command="dotnet tool restore" />
+  </Target>
+  <Target Name="DropNativePdbs" AfterTargets="Publish">
+    <ItemGroup>
+      <NativePdbs Include="$(PublishDir)lib*.pdb" />
+      <NativePdbs Include="$(PublishDir)assimp.pdb" />
+      <NativePdbs Include="$(PublishDir)miniball.pdb" />
+    </ItemGroup>
+    <Delete Files="@(NativePdbs)" ContinueOnError="true" />
+  </Target>
+</Project>
